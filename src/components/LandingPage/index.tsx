@@ -44,7 +44,7 @@ export default function LandingPage(): ReactNode {
                                 <div className={styles.statLabel}>Uptime</div>
                             </div>
                             <div className={styles.stat}>
-                                <div className={styles.statNumber}>50ms</div>
+                                <div className={styles.statNumber}>70ms</div>
                                 <div className={styles.statLabel}>Avg Response</div>
                             </div>
                         </div>
