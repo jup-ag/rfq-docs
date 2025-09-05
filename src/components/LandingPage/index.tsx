@@ -18,7 +18,7 @@ export default function LandingPage(): ReactNode {
                         </Heading>
                         <p className={styles.subtitle}>
                             Integrate your market making system with Jupiter's Request for Quote module.
-                            Provide competitive quotes with 10x lower computational costs and optimized gas efficiency.
+                            Trusted by 15,000 daily users and 15+ market makers with 100+ supported tokens.
                         </p>
                         <div className={styles.buttons}>
                             <a
@@ -36,12 +36,12 @@ export default function LandingPage(): ReactNode {
                         {/* Stats Section */}
                         <div className={styles.stats}>
                             <div className={styles.stat}>
-                                <div className={styles.statNumber}>10x</div>
-                                <div className={styles.statLabel}>Lower Costs</div>
+                                <div className={styles.statNumber}>$100M+</div>
+                                <div className={styles.statLabel}>Daily Volume</div>
                             </div>
                             <div className={styles.stat}>
-                                <div className={styles.statNumber}>99%</div>
-                                <div className={styles.statLabel}>Uptime</div>
+                                <div className={styles.statNumber}>30K</div>
+                                <div className={styles.statLabel}>Daily Transactions</div>
                             </div>
                             <div className={styles.stat}>
                                 <div className={styles.statNumber}>70ms</div>
@@ -60,7 +60,8 @@ export default function LandingPage(): ReactNode {
                             Why Choose Jupiter RFQ?
                         </Heading>
                         <p className={styles.sectionSubtitle}>
-                            Built for professional market makers who demand performance, reliability, and efficiency
+                            Built for professional market makers who demand performance, reliability, and efficiency.
+                            Serving 15,000+ daily users with 15+ active market makers.
                         </p>
                     </div>
 
@@ -69,13 +70,13 @@ export default function LandingPage(): ReactNode {
                             <div className={styles.featureIcon}>⚡</div>
                             <h3 className={styles.featureTitle}>Lightning Fast</h3>
                             <p className={styles.featureDescription}>
-                                Ultra-low latency quote responses with average processing times under 50ms.
+                                Ultra-low latency quote responses with average processing times of 70ms.
                                 Built for high-frequency trading environments.
                             </p>
                         </div>
 
                         <div className={styles.featureCard}>
-                            <div className={styles.featureIcon}>�</div>
+                            <div className={styles.featureIcon}>💰</div>
                             <h3 className={styles.featureTitle}>Cost Efficient</h3>
                             <p className={styles.featureDescription}>
                                 Reduce computational costs by 10x compared to traditional AMM interactions.
@@ -123,8 +124,8 @@ export default function LandingPage(): ReactNode {
                             <div className={styles.featureIcon}>🌍</div>
                             <h3 className={styles.featureTitle}>Global Scale</h3>
                             <p className={styles.featureDescription}>
-                                Support for multiple tokens and trading pairs across Solana.
-                                Scale to handle millions of quotes per day.
+                                Support for 100+ tokens and trading pairs across Solana.
+                                Handle 30,000+ transactions daily with $100M+ in volume.
                             </p>
                         </div>
                     </div>
