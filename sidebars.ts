@@ -25,6 +25,7 @@ const sidebars: SidebarsConfig = {
         'integration/deployment',
       ],
     },
+    'circuit_breaker',
     {
       type: 'category',
       label: 'API Reference',
