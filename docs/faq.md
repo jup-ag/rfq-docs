@@ -104,9 +104,9 @@ However, if two quotes have identical values (unlikely), the faster response wil
 
 ### How long do quotes remain valid?
 
-Quotes have a **50-second expiry** from creation time:
-- **25 seconds** reserved for market maker to verify, sign, and submit transaction
-- **25 seconds** allocated for user to accept the quote
+Quotes have a **55-second expiry** from creation time:
+- **20 seconds** reserved for market maker to verify, sign, and submit transaction
+- **35 seconds** allocated for user to accept the quote
 - **Frontend auto-refresh**: New quotes are requested every 5 seconds
 
 This fixed expiry system simplifies integration by removing the need for custom expiry management.
