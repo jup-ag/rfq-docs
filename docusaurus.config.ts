@@ -55,19 +55,6 @@ const config: Config = {
     ],
   ],
 
-  plugins: [
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'stats',
-        path: 'docs/stats',
-        routeBasePath: 'stats',
-        sidebarPath: './sidebars-stats.ts',
-        editUrl: 'https://github.com/jup-ag/rfq-webhook-toolkit/tree/main/',
-      },
-    ],
-  ],
-
   markdown: {
     mermaid: true,
   },
@@ -91,7 +78,7 @@ const config: Config = {
           label: 'Webhook Integration',
         },
         {
-          to: '/stats/overview',
+          to: '/docs/stats/overview',
           position: 'left',
           label: 'JupiterZ API',
         },
@@ -127,11 +114,11 @@ const config: Config = {
           items: [
             {
               label: 'Overview',
-              to: '/stats/overview',
+              to: '/docs/stats/overview',
             },
             {
               label: 'API Reference',
-              to: '/stats/api-reference',
+              to: '/docs/stats/api-reference',
             },
           ],
         },

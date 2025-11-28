@@ -45,6 +45,14 @@ const sidebars: SidebarsConfig = {
         'testing/troubleshooting',
       ],
     },
+    {
+      type: 'category',
+      label: 'JupiterZ API',
+      items: [
+        'stats/overview',
+        'stats/api-reference',
+      ],
+    },
     'faq',
   ],
 };
