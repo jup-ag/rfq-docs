@@ -78,7 +78,8 @@ const config: Config = {
           label: 'Webhook Integration',
         },
         {
-          to: '/docs/stats/overview',
+          type: 'docSidebar',
+          sidebarId: 'statsSidebar',
           position: 'left',
           label: 'JupiterZ API',
         },

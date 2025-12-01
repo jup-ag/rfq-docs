@@ -47,6 +47,12 @@ const sidebars: SidebarsConfig = {
     },
     'faq',
   ],
+  
+  // Sidebar for JupiterZ API documentation
+  statsSidebar: [
+    'stats/overview',
+    'stats/api-reference',
+  ],
 };
 
 export default sidebars;
