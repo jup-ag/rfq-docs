@@ -73,9 +73,15 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'v1Sidebar',
           position: 'left',
-          label: 'Webhook Integration',
+          label: 'V1',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'v2Sidebar',
+          position: 'left',
+          label: 'V2',
         },
         {
           type: 'docSidebar',
@@ -94,7 +100,7 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Webhook Integration',
+          title: 'V1',
           items: [
             {
               label: 'Getting Started',
@@ -107,6 +113,15 @@ const config: Config = {
             {
               label: 'API Reference',
               to: '/docs/api/overview',
+            },
+          ],
+        },
+        {
+          title: 'V2',
+          items: [
+            {
+              label: 'Architecture',
+              to: '/docs/v2',
             },
           ],
         },

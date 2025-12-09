@@ -13,8 +13,8 @@ import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
  Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
-  // Custom sidebar structure for Jupiter RFQ Webhook Integration
-  tutorialSidebar: [
+  // V1 - Webhook Integration
+  v1Sidebar: [
     'intro',
     {
       type: 'category',
@@ -46,6 +46,21 @@ const sidebars: SidebarsConfig = {
       ],
     },
     'faq',
+  ],
+  
+  // V2 - New RFQ Documentation
+  v2Sidebar: [
+    'v2',
+    {
+      type: 'category',
+      label: 'Market Maker Integration',
+      items: [
+        'v2/overview',
+        'v2/getting-started',
+        'v2/sdk-integration',
+        'v2/grpc-api',
+      ],
+    },
   ],
   
   // Sidebar for JupiterZ API documentation
