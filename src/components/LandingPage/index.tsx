@@ -11,25 +11,25 @@ export default function LandingPage(): ReactNode {
                 <div className="container">
                     <div className={styles.heroContent}>
                         <div className={styles.badge}>
-                            ⚡ Powered by Jupiter Exchange
+                            🚀 NEW: JupiterZ v2 Now Available
                         </div>
                         <Heading as="h1" className={styles.title}>
                             Build Efficient Liquidity with JupiterZ
                         </Heading>
                         <p className={styles.subtitle}>
-                            Integrate your market making system with Jupiter's Request for Quote module.
+                            Next-generation Request for Quote system with gRPC streaming for real-time quotes and low-latency execution.
                             Trusted by 15,000 daily users and 15+ market makers with 100+ supported tokens.
                         </p>
                         <div className={styles.buttons}>
                             <a
                                 className={styles.primaryButton}
-                                href="/docs/intro">
-                                📚 Get Started
+                                href="/docs/v2/overview">
+                                🚀 Explore V2
                             </a>
                             <a
                                 className={styles.secondaryButton}
-                                href="https://github.com/jup-ag/rfq-webhook-toolkit">
-                                💻 View on GitHub
+                                href="/docs/intro">
+                                📚 V1 Documentation
                             </a>
                         </div>
 
@@ -57,75 +57,66 @@ export default function LandingPage(): ReactNode {
                 <div className="container">
                     <div className={styles.sectionHeader}>
                         <Heading as="h2" className={styles.sectionTitle}>
-                            Why Choose JupiterZ?
+                            What's New in V2?
                         </Heading>
                         <p className={styles.sectionSubtitle}>
-                            Built for professional market makers who demand performance, reliability, and efficiency.
-                            Serving 15,000+ daily users with 15+ active market makers.
+                            Next-generation RFQ platform built on gRPC bidirectional streaming for ultra-low latency
+                            and real-time quote management. Serving 15,000+ daily users with 15+ active market makers.
                         </p>
                     </div>
 
                     <div className={styles.featuresGrid}>
                         <div className={styles.featureCard}>
                             <div className={styles.featureIcon}>⚡</div>
-                            <h3 className={styles.featureTitle}>Lightning Fast</h3>
+                            <h3 className={styles.featureTitle}>Real-time Streaming</h3>
                             <p className={styles.featureDescription}>
-                                Ultra-low latency quote responses with average processing times of 70ms.
-                                Built for high-frequency trading environments.
-                            </p>
-                        </div>
-
-                        <div className={styles.featureCard}>
-                            <div className={styles.featureIcon}>💰</div>
-                            <h3 className={styles.featureTitle}>Cost Efficient</h3>
-                            <p className={styles.featureDescription}>
-                                Reduce computational costs by 10x compared to traditional AMM interactions.
-                                Optimize gas usage with batch processing.
-                            </p>
-                        </div>
-
-                        <div className={styles.featureCard}>
-                            <div className={styles.featureIcon}>🔒</div>
-                            <h3 className={styles.featureTitle}>Secure & Reliable</h3>
-                            <p className={styles.featureDescription}>
-                                Enterprise-grade security with 99.9% uptime SLA. Robust error handling
-                                and automatic failover mechanisms.
-                            </p>
-                        </div>
-
-                        <div className={styles.featureCard}>
-                            <div className={styles.featureIcon}>🔧</div>
-                            <h3 className={styles.featureTitle}>Easy Integration</h3>
-                            <p className={styles.featureDescription}>
-                                Simple webhook-based integration with comprehensive documentation.
-                                Get up and running in under 30 minutes.
+                                Bidirectional gRPC streams enable instant quote updates and swap notifications.
+                                Lower latency with persistent connections vs HTTP webhooks.
                             </p>
                         </div>
 
                         <div className={styles.featureCard}>
                             <div className={styles.featureIcon}>📊</div>
-                            <h3 className={styles.featureTitle}>Real-time Analytics</h3>
+                            <h3 className={styles.featureTitle}>Multi-level Orderbooks</h3>
                             <p className={styles.featureDescription}>
-                                Monitor performance with detailed metrics and insights.
-                                Track quote success rates and optimize strategies.
+                                Submit custom bid/ask spreads with multiple price levels.
+                                Tailor your pricing strategy with granular control.
                             </p>
-                            <div className={styles.featureLink}>
-                                <a
-                                    href="https://dune.com/raccoons/jupiterz"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={styles.analyticsLink}>
-                                    📈 View Live Dashboard
-                                </a>
-                            </div>
+                        </div>
+
+                        <div className={styles.featureCard}>
+                            <div className={styles.featureIcon}>👁️</div>
+                            <h3 className={styles.featureTitle}>Last Look</h3>
+                            <p className={styles.featureDescription}>
+                                Review and sign transactions before execution. Full control over
+                                which swaps to accept with built-in validation.
+                            </p>
+                        </div>
+
+                        <div className={styles.featureCard}>
+                            <div className={styles.featureIcon}>🔧</div>
+                            <h3 className={styles.featureTitle}>Official SDKs</h3>
+                            <p className={styles.featureDescription}>
+                                Production-ready Rust and Python SDKs with async support.
+                                Type-safe APIs and built-in authentication handling.
+                            </p>
+                        </div>
+
+                        <div className={styles.featureCard}>
+                            <div className={styles.featureIcon}>🔒</div>
+                            <h3 className={styles.featureTitle}>Enterprise Grade</h3>
+                            <p className={styles.featureDescription}>
+                                Built-in TLS, JWT authentication, and health monitoring.
+                                99.9% uptime SLA with robust error handling.
+                            </p>
                         </div>
 
                         <div className={styles.featureCard}>
                             <div className={styles.featureIcon}>🌍</div>
-                            <h3 className={styles.featureTitle}>Global Scale</h3>
+                            <h3 className={styles.featureTitle}>High Throughput</h3>
                             <p className={styles.featureDescription}>
-                                Support for 100+ tokens and trading pairs across Solana.
                                 Handle 30,000+ transactions daily with $100M+ in volume.
+                                Support for 100+ tokens and trading pairs across Solana.
                             </p>
                         </div>
                     </div>
@@ -137,21 +128,21 @@ export default function LandingPage(): ReactNode {
                 <div className="container">
                     <div className={styles.ctaContent}>
                         <Heading as="h2" className={styles.ctaTitle}>
-                            Ready to Get Started?
+                            Ready to Get Started with V2?
                         </Heading>
                         <p className={styles.ctaSubtitle}>
-                            Join the ecosystem of professional market makers providing liquidity on Jupiter
+                            Join the next generation of market makers providing liquidity on Jupiter with gRPC streaming
                         </p>
                         <div className={styles.buttons}>
                             <a
                                 className={styles.primaryButton}
-                                href="/docs/intro">
-                                🚀 Start Building
+                                href="/docs/v2/getting-started">
+                                🚀 Start with V2
                             </a>
                             <a
                                 className={styles.secondaryButton}
-                                href="/docs/api/overview">
-                                📖 API Reference
+                                href="/docs/v2/grpc-api">
+                                📖 V2 API Reference
                             </a>
                         </div>
                         <div className={styles.ctaNote}>
@@ -159,7 +150,8 @@ export default function LandingPage(): ReactNode {
                             <a href="https://discord.gg/jup" target="_blank" rel="noopener noreferrer">
                                 Discord community
                             </a>{' '}
-                            for support and discussions.
+                            for support. Still using V1?{' '}
+                            <a href="/docs/intro">View V1 documentation</a>.
                         </div>
                     </div>
                 </div>
