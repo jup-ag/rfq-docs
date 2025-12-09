@@ -1,6 +1,6 @@
-# RFQ v2 Overview
+# JupiterZ v2 Overview
 
-Jupiter RFQ v2 is a next-generation Request for Quote system designed for market makers to provide competitive liquidity on Solana. Built on gRPC bidirectional streaming, it enables real-time quote submission and swap execution with low latency and high throughput.
+JupiterZ v2 is a next-generation Request for Quote system designed for market makers to provide competitive liquidity on Solana. Built on gRPC bidirectional streaming, it enables real-time quote submission and swap execution with low latency and high throughput.
 
 ## Key Features
 

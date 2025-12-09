@@ -5,7 +5,7 @@ sidebar_position: 5
 
 # JupiterZ API
 
-The JupiterZ API provides analytics and performance metrics for the Jupiter RFQ system.
+The JupiterZ API provides analytics and performance metrics for the JupiterZ system.
 
 ## Base URL
 

@@ -1,6 +1,6 @@
 # gRPC API Reference
 
-This document provides a complete reference for the Jupiter RFQ v2 gRPC protocol based on the `market_maker.proto` specification.
+This document provides a complete reference for the JupiterZ v2 gRPC protocol based on the `market_maker.proto` specification.
 
 ## Service Definition
 

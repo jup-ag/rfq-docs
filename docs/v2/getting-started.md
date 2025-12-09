@@ -1,6 +1,6 @@
 # Getting Started with RFQ v2
 
-This guide will help you set up your market maker integration with Jupiter RFQ v2.
+This guide will help you set up your market maker integration with JupiterZ v2.
 
 ## Prerequisites
 

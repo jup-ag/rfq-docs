@@ -1,12 +1,12 @@
 ---
 title: API Overview
-description: Complete specification for Jupiter RFQ webhook endpoints
+description: Complete specification for JupiterZ webhook endpoints
 sidebar_position: 1
 ---
 
 # API Overview
 
-The Jupiter RFQ Webhook API consists of three main endpoints that your webhook must implement. This section provides detailed specifications for each endpoint.
+The JupiterZ Webhook API consists of three main endpoints that your webhook must implement. This section provides detailed specifications for each endpoint.
 
 ## Base Requirements
 

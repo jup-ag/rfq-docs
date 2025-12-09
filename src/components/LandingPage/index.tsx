@@ -57,7 +57,7 @@ export default function LandingPage(): ReactNode {
                 <div className="container">
                     <div className={styles.sectionHeader}>
                         <Heading as="h2" className={styles.sectionTitle}>
-                            Why Choose Jupiter RFQ?
+                            Why Choose JupiterZ?
                         </Heading>
                         <p className={styles.sectionSubtitle}>
                             Built for professional market makers who demand performance, reliability, and efficiency.

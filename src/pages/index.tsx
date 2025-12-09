@@ -8,7 +8,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title={`${siteConfig.title} - Professional Market Maker Integration`}
-      description="Integrate your market making system with Jupiter's Request for Quote module. Provide competitive quotes with 10x lower computational costs and optimized gas efficiency."
+      description="Integrate your market making system with Jupiter's Request for Quote module."
       noFooter={false}
       wrapperClassName="jupiter-home-wrapper">
       <main>

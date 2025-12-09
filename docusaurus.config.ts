@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'Jupiter RFQ Webhook Toolkit',
-  tagline: 'Complete documentation for Jupiter RFQ webhook integration',
+  title: 'JupiterZ Documentation',
+  tagline: 'Complete documentation for JupiterZ integration',
   favicon: 'img/jupiter-ag-jup-logo.svg',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -65,7 +65,7 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/jupiter-ag-jup-logo.svg',
     navbar: {
-      title: 'Jupiter RFQ',
+      title: 'JupiterZ Docs',
       logo: {
         alt: 'Jupiter RFQ Logo',
         src: 'img/jupiter-ag-jup-logo.svg',

@@ -1,20 +1,20 @@
 ---
 title: Frequently Asked Questions
-description: Common questions about Jupiter RFQ webhook integration
+description: Common questions about JupiterZ webhook integration
 sidebar_position: 5
 ---
 
 # Frequently Asked Questions
 
-This section answers common questions about Jupiter RFQ webhook integration, covering technical implementation, business considerations, and operational aspects.
+This section answers common questions about JupiterZ webhook integration, covering technical implementation, business considerations, and operational aspects.
 
 ## General Questions
 
-### What is Jupiter RFQ?
+### What is JupiterZ?
 
-Jupiter RFQ (Request for Quote) is a system that allows market makers to provide liquidity for token swaps through competitive quotes. Instead of using automated market makers (AMMs), users receive quotes directly from registered market makers, often resulting in better prices and lower computational costs.
+JupiterZ (Request for Quote) is a system that allows market makers to provide liquidity for token swaps through competitive quotes. Instead of using automated market makers (AMMs), users receive quotes directly from registered market makers, often resulting in better prices and lower computational costs.
 
-### Why should I integrate with Jupiter RFQ?
+### Why should I integrate with JupiterZ?
 
 - **Lower computational costs**: RFQ fills are 10x less CU intensive than AMM swaps
 - **Better pricing control**: Set your own spreads and manage inventory actively  
@@ -30,7 +30,7 @@ Jupiter RFQ (Request for Quote) is a system that allows market makers to provide
 
 ## Technical Implementation
 
-### Does RFQ support native SOL?
+### Does JupiterZ support native SOL?
 
 **Yes**, native SOL is fully supported for both takers (users) and makers. However, market makers should use **WSOL (Wrapped SOL)** in their systems. The order engine program automatically handles SOL wrapping/unwrapping as needed.
 

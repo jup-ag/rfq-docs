@@ -1,19 +1,19 @@
 ---
 title: Introduction
-description: Welcome to the Jupiter RFQ Webhook Toolkit documentation
+description: Welcome to the JupiterZ Webhook Toolkit documentation
 sidebar_position: 1
 ---
 
-# Jupiter RFQ Webhook Toolkit
+# JupiterZ Webhook Toolkit
 
-Welcome to the **Jupiter RFQ Webhook Toolkit** documentation! This comprehensive guide will help you integrate your market making system with Jupiter's Request for Quote (RFQ) module.
+Welcome to the **JupiterZ Webhook Toolkit** documentation! This comprehensive guide will help you integrate your market making system with Jupiter's Request for Quote (RFQ) module.
 
-## What is Jupiter RFQ?
+## What is JupiterZ?
 
-Jupiter RFQ allows market makers to provide liquidity and adjust their quotes without being subject to the volatility of on-chain gas prices or chain health. RFQ fills are much less computationally intensive (10x less) compared to AMM swaps and can save gas costs in the long run.
+JupiterZ allows market makers to provide liquidity and adjust their quotes without being subject to the volatility of on-chain gas prices or chain health. RFQ fills are much less computationally intensive (10x less) compared to AMM swaps and can save gas costs in the long run.
 
 :::info
-📣 **NOTE**: This integration is still subject to changes, and we welcome suggestions for improvements. If you're interested in becoming a Market Maker on Jupiter RFQ, please read this documentation and reach out to [Jo](https://t.me/biuu0x) on Telegram to register your webhook.
+📣 **NOTE**: This integration is still subject to changes, and we welcome suggestions for improvements. If you're interested in becoming a Market Maker on JupiterZ, please read this documentation and reach out to [Jo](https://t.me/biuu0x) on Telegram to register your webhook.
 :::
 
 ## Key Features
