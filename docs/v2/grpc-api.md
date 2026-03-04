@@ -10,6 +10,7 @@ service MarketMakerIngestionService {
     rpc GetAllOrderbooks(GetAllOrderbooksRequest) returns (GetAllOrderbooksResponse);
     rpc StreamQuotes(stream MarketMakerQuote) returns (stream QuoteUpdate);
     rpc StreamSwap(stream MarketMakerSwap) returns (stream SwapUpdate);
+    rpc GetQuotes(GetQuotesRequest) returns (GetQuotesResponse);
 }
 ```
 
@@ -113,6 +114,7 @@ message MarketMakerQuote {
 ```protobuf
 message QuoteUpdate {
     required UpdateType update_type = 1;
+    optional string status_message = 2;   // Human-readable detail (present for REJECTED)
 }
 
 enum UpdateType {
@@ -120,6 +122,7 @@ enum UpdateType {
     UPDATE_TYPE_NEW = 1;       // Quote accepted
     UPDATE_TYPE_UPDATED = 2;   // Quote updated
     UPDATE_TYPE_EXPIRED = 3;   // Quote expired, resubmit
+    UPDATE_TYPE_REJECTED = 4;  // Quote failed validation (see status_message)
 }
 ```
 
@@ -137,6 +140,27 @@ enum UpdateType {
 | `token_pair` | TokenPair | Base and quote token definitions |
 | `bid_levels` | PriceLevel[] | Buy orders (price descending) |
 | `ask_levels` | PriceLevel[] | Sell orders (price ascending) |
+
+---
+
+### GetQuotes
+
+Retrieves quotes for a specific token pair. Useful for querying current market maker quotes.
+
+**Request:**
+```protobuf
+message GetQuotesRequest {
+    required TokenPair token_pair = 1;  // Token pair to get quotes for
+    required string auth_token = 2;     // Authentication token
+}
+```
+
+**Response:**
+```protobuf
+message GetQuotesResponse {
+    repeated MarketMakerQuote quotes = 1;
+}
+```
 
 ---
 
@@ -283,6 +307,7 @@ Monitor for authentication errors and refresh tokens as needed.
 - **Expired quote**: Quote TTL exceeded, submit new quote
 - **Invalid token pair**: Token addresses not recognized
 - **Invalid price**: Price levels malformed or out of bounds
+- **Rejected quote**: Quote failed validation — check `status_message` in the `QuoteUpdate` for details
 
 ### Swap Stream Errors
 

@@ -175,6 +175,7 @@ All connections use:
 
 - **[SDK Integration Guide](./sdk-integration.md)**: Detailed SDK usage with code examples
 - **[gRPC API Reference](./grpc-api.md)**: Complete protocol specification
+- **[Integration Testing](./testing.md)**: Required tests to pass before going live
 - **[Architecture](../v2.md)**: Understand the complete system flow
 
 ## Support

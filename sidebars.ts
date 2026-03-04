@@ -59,6 +59,7 @@ const sidebars: SidebarsConfig = {
         'v2/getting-started',
         'v2/sdk-integration',
         'v2/grpc-api',
+        'v2/testing',
       ],
     },
   ],

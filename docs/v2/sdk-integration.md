@@ -214,5 +214,6 @@ Visit the [rfq-v2-sdk repository](https://github.com/jup-ag/rfq-v2-sdk) for the 
 ## Next Steps
 
 - **[gRPC API Reference](./grpc-api.md)**: Detailed protocol specification
+- **[Integration Testing](./testing.md)**: Required tests to pass before going live
 - **[Architecture](../v2.md)**: System design and data flow
 - **[Getting Started](./getting-started.md)**: Initial setup and configuration
