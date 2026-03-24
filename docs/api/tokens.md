@@ -61,7 +61,7 @@ Returns a JSON array of token mint addresses that your market maker supports.
 - **Wrapped SOL (WSOL)**: Required for SOL swap processing
 
 :::important Native SOL Support
-While Jupiter RFQ supports native SOL for users, market makers should use WSOL (Wrapped SOL) in their systems. The order engine automatically handles SOL wrapping/unwrapping.
+While JupiterZ supports native SOL for users, market makers should use WSOL (Wrapped SOL) in their systems. The order engine automatically handles SOL wrapping/unwrapping.
 :::
 
 ### Token Address Validation

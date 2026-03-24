@@ -1,6 +1,6 @@
 ---
 title: ID Management
-description: Understanding Request IDs and Quote IDs in the Jupiter RFQ system
+description: Understanding Request IDs and Quote IDs in the JupiterZ system
 sidebar_position: 4
 ---
 

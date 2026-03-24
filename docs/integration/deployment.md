@@ -1,12 +1,12 @@
 ---
 title: Deployment Guide
-description: Best practices for deploying your Jupiter RFQ webhook to production
+description: Best practices for deploying your JupiterZ webhook to production
 sidebar_position: 3
 ---
 
 # Deployment Guide
 
-This guide covers best practices for deploying your Jupiter RFQ webhook to production.
+This guide covers best practices for deploying your JupiterZ webhook to production.
 
 ## Pre-Deployment Checklist
 

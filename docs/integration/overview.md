@@ -1,6 +1,6 @@
 ---
 title: Integration Overview
-description: Comprehensive guidance for market makers integrating with Jupiter RFQ
+description: Comprehensive guidance for market makers integrating with JupiterZ
 sidebar_position: 1
 ---
 

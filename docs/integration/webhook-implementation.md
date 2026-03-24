@@ -1,12 +1,12 @@
 ---
 title: Webhook Implementation
-description: Step-by-step guide to implementing Jupiter RFQ webhook endpoints
+description: Step-by-step guide to implementing JupiterZ webhook endpoints
 sidebar_position: 2
 ---
 
 # Webhook Implementation
 
-This guide walks you through implementing the required webhook endpoints for Jupiter RFQ integration.
+This guide walks you through implementing the required webhook endpoints for JupiterZ integration.
 
 ## Endpoint Requirements
 

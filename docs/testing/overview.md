@@ -1,12 +1,12 @@
 ---
 title: Testing Overview
-description: Comprehensive testing guide for Jupiter RFQ webhook integration
+description: Comprehensive testing guide for JupiterZ webhook integration
 sidebar_position: 1
 ---
 
 # Testing Overview
 
-This section provides comprehensive testing tools and guidelines for validating your Jupiter RFQ webhook implementation. The tests are written using [Vitest](https://vitest.dev).
+This section provides comprehensive testing tools and guidelines for validating your JupiterZ webhook implementation. The tests are written using [Vitest](https://vitest.dev).
 
 
 ## Requirements
@@ -30,7 +30,7 @@ make prepare-tests
 
 ### Acceptance tests
 
-These tests simulate the interaction between the Jupiter RFQ module and the webhook API. The tests are useful to verify that your implementation is compatible with the Jupiter RFQ module,
+These tests simulate the interaction between the JupiterZ module and the webhook API. The tests are useful to verify that your implementation is compatible with the JupiterZ module,
 
 The tests can be found in the `tests/suites/acceptance/` directory in the webhook toolkit repository.
 
@@ -60,7 +60,7 @@ pnpm run acceptance
 
 ### Integration tests
 
-Integration tests are end to end tests that simulate the user interaction. The tests are running against our edge (pre-production) environment and require that the webhook has been registered with Jupiter RFQ.
+Integration tests are end to end tests that simulate the user interaction. The tests are running against our edge (pre-production) environment and require that the webhook has been registered with JupiterZ.
 
 The tests can be found in the `tests/suites/integration/` directory in the webhook toolkit repository.
 

@@ -1,10 +1,10 @@
-# Jupiter RFQ Documentation
+# JupiterZ Documentation
 
 This documentation site provides comprehensive guidance for market makers integrating with Jupiter's Request for Quote (RFQ) system.
 
 ## Overview
 
-Jupiter RFQ allows market makers to provide liquidity through competitive quotes rather than traditional AMM pools. This results in:
+JupiterZ allows market makers to provide liquidity through competitive quotes rather than traditional AMM pools. This results in:
 
 - **Lower computational costs** (10x less than AMM swaps)
 - **Better pricing control** for market makers
@@ -46,7 +46,7 @@ This command generates static content into the `build` directory and can be serv
 
 ## Contributing
 
-This documentation is based on the official Jupiter RFQ Webhook Toolkit:
+This documentation is based on the official JupiterZ Webhook Toolkit:
 - **GitHub Repository**: [jup-ag/rfq-webhook-toolkit](https://github.com/jup-ag/rfq-webhook-toolkit)
 - **Contact**: [Jo on Telegram](https://t.me/biuu0x) for integration support
 
@@ -59,4 +59,4 @@ This documentation is based on the official Jupiter RFQ Webhook Toolkit:
 
 ## License
 
-This documentation follows the same license as the Jupiter RFQ Webhook Toolkit.
+This documentation follows the same license as the JupiterZ Webhook Toolkit.
