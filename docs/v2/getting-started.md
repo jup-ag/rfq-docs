@@ -10,7 +10,7 @@ Before you begin, ensure you have:
   - `MM_MAKER_ID`: Your unique market maker identifier
   - `MM_AUTH_TOKEN`: JWT authentication token
   - `RFQ_ENDPOINT`: RFQ service endpoint URL
-  
+
 - **Solana Wallet**: A Solana private key (base58 encoded) for signing transactions
 
 - **Development Environment**:
@@ -32,11 +32,11 @@ export SOLANA_PRIVATE_KEY="your-base58-private-key"
 
 ### 2. Choose Your SDK
 
-Jupiter provides official SDKs in Rust and Python. Choose based on your technology stack and performance requirements.
+Jupiter provides official SDKs in Rust and Python. Both share the same shape, naming, and feature set — pick the one that fits your stack.
 
 #### Rust SDK
 
-**Installation:**
+Clone and build:
 
 ```bash
 git clone https://github.com/jup-ag/rfq-v2-sdk
@@ -44,38 +44,40 @@ cd rfq-v2-sdk/rust-sdk
 cargo build --release
 ```
 
-**Requirements:**
-- Rust 1.70 or later
-- Tokio runtime for async operations
+**Requirements**: Rust 1.70+ and the Tokio runtime.
 
-**Quick Test:**
+Run an example to verify the setup:
 
 ```bash
 cargo run --example production_streaming
 ```
 
+Other bundled examples: `reflection_cli`, `deploy_spl_token`.
+
 #### Python SDK
 
-**Installation:**
+The Python protobuf stubs are not committed to the repo — they are generated locally from `protos/market_maker.proto` after cloning. Generate them once, then install.
 
 ```bash
 git clone https://github.com/jup-ag/rfq-v2-sdk
 cd rfq-v2-sdk/python-sdk
-python -m venv ./venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -e .
+python -m venv ./venv && source venv/bin/activate
+pip install grpcio-tools
+python scripts/generate_protos.py
+pip install .
 ```
 
-**Requirements:**
-- Python 3.8+
-- asyncio
-- grpcio, protobuf, solders, base58
+Re-run `python scripts/generate_protos.py` whenever the `.proto` file changes.
 
-**Quick Test:**
+**Requirements**: Python 3.8+. Dependencies installed by `pip install .`: `grpcio`, `grpcio-tools`, `grpcio-reflection`, `protobuf`, `solders`, `base58`.
+
+Run an example to verify the setup:
 
 ```bash
 python examples/production_streaming.py
 ```
+
+Other bundled examples: `reflection_cli.py`, `deploy_spl_token.py`.
 
 ## Understanding the Flow
 
@@ -98,43 +100,17 @@ When a user requests a swap:
 4. **Submit** signed transaction back to RFQ server
 5. **Confirm** transaction execution on Solana
 
-## Basic Quote Structure
-
-A market maker quote contains:
-
-```typescript
-{
-  timestamp: 1234567890,           // Unix timestamp (microseconds)
-  sequence_number: 1,              // Monotonic counter
-  quote_expiry_time: 5000000,      // Quote validity (microseconds)
-  maker_id: "your-maker-id",
-  maker_address: "solana-address",
-  lot_size_base: 1000000,          // Minimum trade size
-  cluster: MAINNET,                // or DEVNET
-  token_pair: {
-    base_token: { address: "...", decimals: 6, symbol: "USDC" },
-    quote_token: { address: "...", decimals: 9, symbol: "SOL" }
-  },
-  bid_levels: [
-    { volume: 10000000000, price: 100500000 },
-    { volume: 20000000000, price: 100400000 }
-  ],
-  ask_levels: [
-    { volume: 10000000000, price: 100600000 },
-    { volume: 20000000000, price: 100700000 }
-  ]
-}
-```
-
 ## Price and Volume Encoding
 
 - **Volume**: Expressed in base token's smallest unit (e.g., lamports for SOL, micro-units for USDC)
-- **Price**: Quote token per unit of base token, scaled by decimals
-  
+- **Price**: Quote token per unit of base token, scaled by quote-token decimals
+
 **Example**: For SOL/USDC pair:
 - SOL has 9 decimals, USDC has 6 decimals
 - Price of 100.5 USDC per SOL = `100500000` (100.5 × 10^6)
 - Volume of 10 SOL = `10000000000` (10 × 10^9)
+
+See [gRPC API Reference](./grpc-api.md) for full message schemas.
 
 ## Sequence Numbers
 
@@ -150,30 +126,25 @@ This ensures quote ordering and helps the server detect gaps.
 
 ### Health Checks
 
-Both quote and swap streams support ping/pong:
-
-```python
-# Server will periodically send PING
-# SDK automatically responds with PONG
-```
+Both quote and swap streams support ping/pong. The server periodically sends `PING` and the SDK automatically responds with `PONG`.
 
 ### Reconnection Logic
 
-If connection drops:
+If the connection drops:
 
-1. Get last sequence number from server
+1. Get the last sequence number from the server
 2. Resume from `last_sequence_number + 1`
 3. Resubmit active quotes
 
-### TLS/Authentication
+### TLS / Authentication
 
 All connections use:
 - TLS encryption (production endpoints)
-- JWT token authentication (in `auth_token` field or metadata)
+- JWT token authentication (in `auth_token` field or gRPC metadata)
 
 ## Next Steps
 
-- **[SDK Integration Guide](./sdk-integration.md)**: Detailed SDK usage with code examples
+- **[SDK Integration Guide](./sdk-integration.md)**: SDK usage and integration workflow
 - **[gRPC API Reference](./grpc-api.md)**: Complete protocol specification
 - **[Integration Testing](./testing.md)**: Required tests to pass before going live
 - **[Architecture](../v2.md)**: Understand the complete system flow
@@ -181,6 +152,6 @@ All connections use:
 ## Support
 
 For integration support:
-- Technical issues: Create an issue on GitHub
-- Credentials and onboarding: Contact Jupiter team
-- General questions: Join Jupiter Discord
+- Technical issues: Create an issue on [GitHub](https://github.com/jup-ag/rfq-v2-sdk)
+- Credentials and onboarding: Contact the Jupiter team
+- General questions: Join the Jupiter Discord
