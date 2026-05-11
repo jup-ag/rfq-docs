@@ -22,6 +22,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'integration/overview',
         'integration/webhook-implementation',
+        'integration/squads',
         'integration/deployment',
       ],
     },
