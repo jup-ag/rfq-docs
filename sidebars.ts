@@ -59,6 +59,8 @@ const sidebars: SidebarsConfig = {
         'v2/overview',
         'v2/getting-started',
         'v2/sdk-integration',
+        'v2/last-look-and-safety',
+        'v2/lifecycle-and-circuit-breaker',
         'v2/grpc-api',
         'v2/testing',
       ],
