@@ -1,188 +1,385 @@
-# SDK Integration Guide
+# SDK Integration
 
-This guide covers integrating with RFQ v2 using the official Rust and Python SDKs. Both SDKs share the same shape, naming, and feature set so you can switch between them without re-learning the API.
+This guide walks through a complete market-maker integration with the official Rust and Python SDKs: connecting, streaming quotes, and handling swaps with last look. Both SDKs mirror each other, so the structure is identical in either language.
 
-For runnable examples, see the `examples/` directory in each SDK — they are self-contained and the most up-to-date reference.
+The runnable reference for everything here is `examples/production_streaming.rs` / `examples/production_streaming.py`. When in doubt, read the example.
 
-## Rust SDK
+## The shape of an integration
 
-### Installation
-
-Clone the SDK and build:
-
-```bash
-git clone https://github.com/jup-ag/rfq-v2-sdk
-cd rfq-v2-sdk/rust-sdk
-cargo build --release
+```mermaid
+graph TD
+    A[Connect client] --> B[Open swap stream]
+    B --> C[Open quote stream with sequence sync]
+    C --> D{Loop}
+    D --> E[Build + send orderbooks]
+    E --> F[Drain QuoteUpdate acks]
+    F --> D
+    B -.-> G[Swap task]
+    G --> H[Receive SwapUpdate]
+    H --> I[Last look: validate + co-sign]
+    I --> J[Submit SWAP_SUBMIT]
+    J --> G
 ```
 
-**Requirements**: Rust 1.70+ and the Tokio runtime.
+Two concurrent activities run for the life of the connection:
 
-### Key Concepts
+- a **quote loop** that repeatedly builds and sends orderbooks, and
+- a **swap task** that reacts to incoming swap notifications.
 
-**Quote Streaming**
-- Connect to the RFQ server using your credentials
-- Submit orderbooks with bid/ask price levels
-- Receive acknowledgments (quote accepted, updated, or expired)
-- Continuously update quotes based on market conditions
+## Connecting
 
-**Swap Execution**
-- Receive swap notifications with unsigned transactions
-- Validate swap details (price, volume, token addresses)
-- Sign transactions if accepted (last look capability)
-- Submit signed transactions back to the server
-- Receive confirmation when published to Solana
+Create a `ClientConfig` with your endpoint and API key, then connect. TLS is enabled automatically for `https://` endpoints (plain `http://` connects in cleartext — use it only for local testing).
 
-### Running Examples
+**Rust**
 
-```bash
-cargo run --example production_streaming
+```rust
+use market_maker_client_sdk::{ClientConfig, MarketMakerClient, StreamConfig};
+use std::time::Duration;
+
+// Required once before opening a TLS connection.
+let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
+
+let config = ClientConfig::new("https://rfq-mm-edge-grpc.raccoons.dev")
+    .with_timeout(30)
+    .with_max_retries(5)
+    .with_auth_token(std::env::var("MM_AUTH_TOKEN")?);
+
+let mut client = MarketMakerClient::connect_with_config(config).await?;
 ```
 
-Other bundled examples: `reflection_cli`, `deploy_spl_token`.
+**Python**
 
-The `production_streaming` example demonstrates:
-- Establishing a gRPC connection with authentication
-- Managing sequence numbers for quote synchronization
-- Submitting multi-level orderbooks
-- Handling swap requests with last look validation
-- Error handling and reconnection logic
+```python
+from rfq_sdk import ClientConfig, MarketMakerClient, StreamConfig
 
----
+config = (
+    ClientConfig(endpoint="https://rfq-mm-edge-grpc.raccoons.dev")
+    .with_timeout(30)
+    .with_max_retries(5)
+    .with_auth_token(os.environ["MM_AUTH_TOKEN"])
+)
 
-## Python SDK
-
-### Installation
-
-The Python protobuf stubs are not committed to the repo — they are generated locally from `protos/market_maker.proto` after cloning. Generate them once, then install.
-
-```bash
-git clone https://github.com/jup-ag/rfq-v2-sdk
-cd rfq-v2-sdk/python-sdk
-python -m venv ./venv && source venv/bin/activate
-pip install grpcio-tools
-python scripts/generate_protos.py
-pip install .
+client = await MarketMakerClient.connect_with_config(config)
 ```
 
-Re-run `python scripts/generate_protos.py` whenever the `.proto` file changes.
+The API key you set with `with_auth_token` is sent as gRPC metadata on the streaming RPCs. It is an **API key, not a JWT** — do not add a `Bearer` prefix. See [Authentication](./grpc-api.md#authentication).
 
-**Requirements**: Python 3.8+. Dependencies installed by `pip install .`: `grpcio`, `grpcio-tools`, `grpcio-reflection`, `protobuf`, `solders`, `base58`.
+:::note StreamConfig is mostly advisory today
+`StreamConfig` (buffer size, timeouts, `auto_reconnect`) is accepted by the streaming methods, but most fields are not yet wired into the SDK's transport — notably **there is no automatic reconnection**. `receive_update_timeout` takes an explicit timeout argument (a `Duration` in Rust, seconds in Python), not the config, and `is_healthy` reads `inactivity_timeout`; `operation_timeout` is currently unused. Treat reconnection as your responsibility (see [Reconnection](#reconnection)).
+:::
 
-### Key Concepts
+## Connect both streams
 
-**Quote Streaming**
-- Use the async/await pattern for streaming quotes
-- Maintain monotonic sequence numbers
-- Define token pairs with proper decimals
-- Submit price levels for both bid and ask sides
-- Handle quote lifecycle (new, updated, expired)
+Open the **swap stream first**, then the quote stream. The server rejects quotes from a maker that has no live swap connection, so quoting before the swap stream is up will just produce rejections.
 
-**Swap Execution**
-- Listen for swap notifications on a separate stream
-- Decode base58 encoded transactions
-- Implement custom validation logic
-- Sign with a Solana keypair via `solders`
-- Return signed transaction or reject swap
+The quote stream is opened with sequence synchronisation: the SDK calls `GetLastSequenceNumber` under the hood and returns the next sequence number to use.
 
-### Running Examples
+**Rust**
 
-```bash
-python examples/production_streaming.py
+```rust
+let stream_config = StreamConfig::new()
+    .with_send_buffer_size(10_000)
+    .with_operation_timeout(Duration::from_secs(30));
+
+// 1) Swap stream first.
+let swap_stream = client.start_swap_streaming().await?;
+
+// 2) Quote stream, synced to the server's last sequence number.
+let auth_token = client.config().auth_token.clone().unwrap_or_default();
+let (quote_stream, mut next_sequence) = client
+    .start_streaming_with_sync_and_config(maker_id.clone(), auth_token, &stream_config)
+    .await?;
 ```
 
-Other bundled examples: `reflection_cli.py`, `deploy_spl_token.py`.
+**Python**
 
-The `production_streaming` example demonstrates:
-- Async client initialization
-- Quote stream management
-- Swap stream handling with last look
-- Transaction signing with the `solders` library
-- Proper error handling and logging
+```python
+stream_config = StreamConfig().with_send_buffer_size(10_000)
 
----
+# 1) Swap stream first.
+swap_stream = await client.start_swap_streaming(stream_config)
 
-## Integration Workflow
+# 2) Quote stream, synced to the server's last sequence number.
+quote_stream, next_sequence = await client.start_streaming_with_sync_and_config(
+    maker_id, auth_token, stream_config
+)
+```
 
-### 1. Setup Environment
+Run the swap task concurrently with the quote loop — `tokio::spawn` in Rust, `asyncio.create_task` in Python.
 
-Configure required environment variables:
+## Sequence numbers
 
-- `MM_MAKER_ID` — Your market maker identifier
-- `MM_AUTH_TOKEN` — JWT authentication token
-- `RFQ_ENDPOINT` — RFQ service endpoint
-- `SOLANA_PRIVATE_KEY` — Base58 encoded private key
+Every quote carries a `sequence_number` that must be **strictly increasing per maker**. The server rejects any quote whose sequence is less than or equal to the last one it stored for you.
 
-### 2. Initialize Client
+- `start_streaming_with_sync_and_config` returns the correct starting value (`last_sequence + 1`).
+- Increment it by one for **each quote you send** — note that sending orderbooks for two token pairs consumes two sequence numbers.
+- After a reconnect, sync again (sequence state is per-maker and held in memory by the server, so it resets if the server restarts — always re-sync rather than assuming a value).
 
-Both SDKs provide a client that handles:
+## Building and sending quotes
 
-- gRPC connection management
-- TLS encryption
-- Authentication headers
-- Stream lifecycle
+A `MarketMakerQuote` is a multi-level orderbook for one token pair. Use the builder to assemble it.
 
-### 3. Stream Quotes
+**Rust**
 
-- Get the last sequence number (for reconnection)
-- Create token pair definitions
-- Build price levels (volume and price)
-- Send quotes periodically (before expiry)
-- Listen for server updates
+```rust
+use market_maker_client_sdk::MarketMakerQuote;
 
-### 4. Handle Swaps
+let quote = MarketMakerQuote::builder()
+    .maker_id(&maker_id)
+    .sol_usdc_pair()                 // or .token_pair(custom_pair)
+    .sequence_number(next_sequence)
+    .expiry_time_secs(60)            // seconds — see the warning below
+    .maker_address(maker_address.clone())
+    .lot_size_base(10u64.pow(3))     // 10^(base_decimals - quote_decimals); SOL/USDC = 10^(9-6)
+    .bid_level(1_000_000_000, 153_450_000)  // (volume in base atoms, price in quote atoms per whole base)
+    .ask_level(1_000_000_000, 153_550_000)
+    .build()?;
 
-- Monitor the swap stream for notifications
-- Decode the unsigned transaction
-- Validate against your criteria
-- Sign if acceptable
-- Submit or reject
-- Track confirmations
+quote_stream.send_quote(quote).await?;
+next_sequence += 1;
+```
 
-### 5. Error Recovery
+**Python**
 
-- Reconnect with exponential backoff (1s, 2s, 4s, 8s, max 60s)
-- Resynchronize sequence numbers after disconnect
-- Resubmit active quotes
-- Log for debugging
+```python
+from rfq_sdk import MarketMakerQuoteBuilder
 
----
+quote = (
+    MarketMakerQuoteBuilder.new()
+    .maker_id(maker_id)
+    .sol_usdc_pair()                     # or .token_pair(custom_pair)
+    .sequence_number(next_sequence)
+    .expiry_time_secs(60)                # seconds — see the warning below
+    .maker_address(maker_address)
+    .lot_size_base(10 ** 3)              # 10^(base_decimals - quote_decimals)
+    .bid_level(1_000_000_000, 153_450_000)   # (volume in base atoms, price in quote atoms per whole base)
+    .ask_level(1_000_000_000, 153_550_000)
+    .build()
+)
 
-## Advanced Topics
+await quote_stream.send_quote(quote)
+next_sequence += 1
+```
 
-### Multi-Token Pair Support
+The builder validates required fields (`maker_id`, `token_pair`, `maker_address`, `lot_size_base`, at least one non-zero level) and errors before you send an invalid quote. For a custom token pair, build a `TokenPair` from two `Token`s — see [Custom token pairs](#custom-token-pairs). For the full encoding rules (volume, price, `lot_size_base`), see [Encoding](./grpc-api.md#encoding).
 
-Stream quotes for multiple token pairs by submitting separate quote messages with different `token_pair` values. The server maintains orderbooks per pair.
+:::danger `quote_expiry_time` is in SECONDS
+The ingestion service interprets `quote_expiry_time` as a **duration in seconds** (default minimum **10s**). Always use **`expiry_time_secs(n)`** with `n >= 10`.
 
-### Dynamic Pricing
+Do **not** use `expiry_time_micros()` or rely on the builder's default (`30_000_000`): the server would read those as *seconds*, producing a nonsensically long expiry. The SDK's client-side `is_expired()` / `QuoteHelper.is_expired` helpers also assume microseconds and disagree with the server — don't rely on them to judge server-side expiry. (The proto comment that calls this field "microseconds" is inaccurate.)
+:::
 
-Update quotes based on:
+### Drain the acknowledgements
 
-- External price feeds (CEX prices, oracles)
-- Inventory management (reduce size when inventory is low)
-- Market volatility (widen spreads in volatile conditions)
-- Volume-based spreads (better prices for larger trades)
+After each send, the server replies with a `QuoteUpdate` on the same stream. **You must consume these replies.** If you leave them unread, gRPC flow-control back-pressure builds up and the server drops your stream. Drain pending updates between sends:
 
-### Performance Tips
+**Rust**
 
-- **Rust**: use `tokio::spawn` for parallel quote generation; batch updates where appropriate; pool connections for external data sources.
-- **Python**: use `asyncio.gather()` for concurrent operations; cache token metadata; profile critical paths.
+```rust
+use market_maker_client_sdk::streaming::update_helpers;
 
----
+async fn drain(stream: &mut market_maker_client_sdk::streaming::QuoteStreamHandle) {
+    loop {
+        match stream.receive_update_timeout(Duration::from_millis(200)).await {
+            Ok(Some(update)) => {
+                if update_helpers::is_updated_quote(&update) {
+                    // accepted
+                } else if update_helpers::is_rejected_quote(&update) {
+                    tracing::error!(
+                        "quote rejected: {}",
+                        update_helpers::get_status_message(&update).unwrap_or("no reason")
+                    );
+                }
+            }
+            Ok(None) => break, // stream closed
+            Err(_) => break,   // no more pending updates
+        }
+    }
+}
+```
 
-## SDK Reference
+**Python**
 
-**Rust SDK**: generate API docs locally with `cargo doc --open`. Inline documentation lives in the source under `src/`.
+```python
+from rfq_sdk.streaming import update_helpers
 
-**Python SDK**: docstrings and type hints live in the source under `src/rfq_sdk/`. Use IDE autocomplete to explore.
+async def drain(stream):
+    while True:
+        try:
+            update = await stream.receive_update_timeout(0.2)
+        except Exception:
+            return  # timeout: no more pending updates
+        if update is None:
+            return  # stream closed
+        if update_helpers.is_updated_quote(update):
+            pass  # accepted
+        elif update_helpers.is_rejected_quote(update):
+            reason = update_helpers.get_status_message(update) or "no reason"
+            logger.error("quote rejected: %s", reason)
+```
 
-Both SDKs include comprehensive examples — see the `examples/` directories for production streaming, reflection tooling, and SPL token deployment.
+:::tip A successful ack is `UPDATED`, not `NEW`
+The server acknowledges a stored quote with `UPDATE_TYPE_UPDATED` and reports failures with `UPDATE_TYPE_REJECTED` (plus a `status_message`). It does **not** emit `NEW` or `EXPIRED` on the stream, even though those enum values exist. Treat `UPDATED` as "accepted" and always read `status_message` on `REJECTED`.
+:::
 
----
+Common rejection reasons (see [Validation](./grpc-api.md#server-side-validation) for the full list): swap stream not connected, maker not in `prod` status, `lot_size_base` mismatch, expiry below the minimum, a price/volume of zero, missing token ATAs, or an out-of-order sequence number.
 
-## Next Steps
+## Handling swaps (last look)
 
-- **[gRPC API Reference](./grpc-api.md)**: Detailed protocol specification
-- **[Integration Testing](./testing.md)**: Required tests to pass before going live
-- **[Architecture](../v2.md)**: System design and data flow
-- **[Getting Started](./getting-started.md)**: Initial setup and configuration
+The swap task reads `SwapUpdate` messages and reacts by type. The important one is `SWAP_AVAILABLE`: validate the transaction, co-sign it, and return it as `SWAP_SUBMIT`.
+
+**Rust**
+
+```rust
+use market_maker_client_sdk::{MarketMakerSwap, types::SwapMessageType};
+use market_maker_client_sdk::streaming::swap_update_helpers;
+
+while let Ok(Some(update)) = swap_stream.receive_update().await {
+    if swap_update_helpers::is_connection_ready(&update) {
+        // stream established
+    } else if swap_update_helpers::is_swap_available(&update) {
+        if let Some((swap_uuid, unsigned_tx)) = swap_update_helpers::extract_swap_details(&update) {
+            // Last look: validate `unsigned_tx` against your quote before signing.
+            let signed_tx = co_sign(unsigned_tx, &keypair)?; // base64 in, base64 out
+            swap_stream.send_swap(MarketMakerSwap {
+                message_type: SwapMessageType::SwapSubmit as i32,
+                swap_uuid: swap_uuid.to_string(),
+                signed_transaction: signed_tx,
+            }).await?;
+        }
+    } else if swap_update_helpers::is_transaction_confirmed(&update) {
+        if let Some((uuid, sig)) = swap_update_helpers::extract_confirmation_details(&update) {
+            tracing::info!("confirmed {uuid}: {sig}");
+        }
+    } else if swap_update_helpers::is_error(&update) {
+        tracing::error!("swap error: {}",
+            swap_update_helpers::get_status_message(&update).unwrap_or("unknown"));
+    }
+}
+```
+
+**Python**
+
+```python
+from rfq_sdk import MarketMakerSwap, SwapMessageType, swap_helpers
+
+while True:
+    update = await swap_stream.receive_update()
+    if update is None:
+        break
+    if swap_helpers.is_connection_ready(update):
+        pass
+    elif swap_helpers.is_swap_available(update):
+        details = swap_helpers.extract_swap_details(update)
+        if details:
+            swap_uuid, unsigned_tx = details
+            signed_tx = co_sign(unsigned_tx, keypair)   # base64 in, base64 out
+            await swap_stream.send_swap(MarketMakerSwap(
+                message_type=SwapMessageType.SWAP_MESSAGE_TYPE_SWAP_SUBMIT,
+                swap_uuid=swap_uuid,
+                signed_transaction=signed_tx,
+            ))
+    elif swap_helpers.is_transaction_confirmed(update):
+        details = swap_helpers.extract_confirmation_details(update)
+        if details:
+            uuid, sig = details
+            logger.info("confirmed %s: %s", uuid, sig)
+    elif swap_helpers.is_error(update):
+        logger.error("swap error: %s", swap_helpers.get_status_message(update) or "unknown")
+```
+
+:::warning Transactions are base64, and you sign signer slot 1
+The `unsigned_transaction` in `SWAP_AVAILABLE` and the `signed_transaction` you return are **base64-encoded** (base58 is only ever used for your private key). The transaction is already taker-signed at signer index 0; you are the second required signer (the fill authority), so place your signature at **index 1**. The full signing procedure, validation, and the on-chain guards that protect you are in **[Last Look & Maker Safety](./last-look-and-safety.md)**.
+:::
+
+You have a limited window (by default **10 seconds**) to submit after `SWAP_AVAILABLE`. If you miss it, the swap expires — there is no fallback to a next-best quote in V2.
+
+### Keep-alive (ping/pong)
+
+Send periodic application-level pings on the swap stream and treat pongs as liveness. The server replies with `PONG` but never initiates an application ping itself. (This is separate from the automatic HTTP/2 transport keep-alive.)
+
+**Rust**
+
+```rust
+let ping = MarketMakerSwap {
+    message_type: SwapMessageType::Ping as i32,
+    swap_uuid: String::default(),
+    signed_transaction: String::default(),
+};
+swap_stream.send_swap(ping).await?;
+// on inbound: swap_update_helpers::is_pong(&update)
+```
+
+**Python**
+
+```python
+ping = MarketMakerSwap(
+    message_type=SwapMessageType.SWAP_MESSAGE_TYPE_PING,
+    swap_uuid="",
+    signed_transaction="",
+)
+await swap_stream.send_swap(ping)
+# on inbound: swap_helpers.is_pong(update)
+```
+
+## Reconnection
+
+The SDK does **not** reconnect automatically. Build your own supervisor loop that, on any stream error or disconnect:
+
+1. Reconnects the client (`connect_with_config`), backing off between attempts (e.g. 1s, 2s, 4s, 8s, capped at 60s).
+2. Re-opens the **swap stream** first.
+3. Re-opens the quote stream with `start_streaming_with_sync_and_config` to **re-fetch the sequence number** (do not assume your previous value).
+4. Resubmits your active orderbooks.
+
+Watch the return values of `send_quote`/`send_swap` and `receive_update*` — an `Err`, or an `Ok(None)`/`None` (stream closed by the server), is your signal to tear down and reconnect.
+
+## Custom token pairs
+
+For pairs other than the built-in `sol_usdc_pair()`/`eth_usdc_pair()`, construct a `TokenPair` from two `Token`s. The `owner` field is the token program that owns the mint (the SPL Token program for standard tokens).
+
+**Rust**
+
+```rust
+use market_maker_client_sdk::types::{Token, TokenPair};
+
+let pair = TokenPair::new(
+    Token::new("So11111111111111111111111111111111111111112", 9, "SOL",
+               "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+    Token::new("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 6, "USDC",
+               "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+);
+```
+
+**Python**
+
+```python
+from rfq_sdk import TokenHelper, TokenPair
+
+pair = TokenPair(
+    base_token=TokenHelper.new("So11111111111111111111111111111111111111112", 9, "SOL",
+                               "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+    quote_token=TokenHelper.new("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", 6, "USDC",
+                                "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
+)
+```
+
+Remember that `lot_size_base` must match the pair: `10^(base_decimals - quote_decimals)`. For SOL/USDC that is `10^(9-6) = 1000`; when the base has fewer or equal decimals to the quote, it is `1`.
+
+## Stats, health, and shutdown
+
+Both stream handles expose bookkeeping and graceful shutdown:
+
+- `get_stats()` — messages sent, updates received, errors, uptime.
+- `is_healthy(&stream_config)` (swap stream) — a lightweight liveness check.
+- `close_with_timeout(duration)` — drain and close a stream.
+- `client.close()` (Python) — close the channel.
+
+## Multiple token pairs
+
+To quote several pairs, send a separate `MarketMakerQuote` per pair (each with its own `token_pair` and the next sequence number), and drain the acknowledgements between sends. The server maintains an independent orderbook per (maker, pair).
+
+## Next steps
+
+- **[Last Look & Maker Safety](./last-look-and-safety.md)** — validate and co-sign fills safely.
+- **[gRPC API Reference](./grpc-api.md)** — message schemas, encoding, authentication, and validation.
+- **[Testing](./testing.md)** — end-to-end verification before production.

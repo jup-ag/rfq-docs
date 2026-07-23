@@ -1,40 +1,48 @@
-# Getting Started with RFQ v2
+# Getting Started
 
-This guide will help you set up your market maker integration with JupiterZ v2.
+This guide gets you from zero to a running market-maker connection: obtaining credentials, installing an SDK, and streaming your first quote.
 
 ## Prerequisites
 
-Before you begin, ensure you have:
+**Credentials from Jupiter.** Onboarding is currently handled by the Jupiter team. You will receive:
 
-- **Market Maker Credentials**: Contact Jupiter to obtain:
-  - `MM_MAKER_ID`: Your unique market maker identifier
-  - `MM_AUTH_TOKEN`: JWT authentication token
-  - `RFQ_ENDPOINT`: RFQ service endpoint URL
+- **API key** — authenticates your gRPC connection.
+- **Maker id** — your provider identifier (the `provider` string on your account). It is also the identity your quotes are keyed under.
+- **gRPC endpoint** — the ingestion service to connect to. The SDK examples default to the edge endpoint `https://rfq-mm-edge-grpc.raccoons.dev`.
 
-- **Solana Wallet**: A Solana private key (base58 encoded) for signing transactions
+**A Solana keypair.** A base58-encoded private key used to co-sign fills. Its public key is your **maker address**; it must hold associated token accounts (ATAs) with inventory for every token you quote, or the server will filter out (or reject) your levels.
 
-- **Development Environment**:
-  - For Rust: Rust 1.70+ with Tokio runtime
-  - For Python: Python 3.8+ with asyncio support
+**A toolchain:**
 
-## Environment Setup
+- **Rust SDK** — Rust 1.70+ with the Tokio runtime.
+- **Python SDK** — Python 3.8+ with asyncio.
 
-### 1. Set Environment Variables
+## Environment variables
 
-Create a `.env` file or export these variables:
+The bundled examples read configuration from the environment. Set what you have:
+
+| Variable | Used for | Notes |
+|---|---|---|
+| `MM_AUTH_TOKEN` | Your API key | Sent as gRPC metadata by the SDK. Not a JWT — see [Authentication](./grpc-api.md#authentication). |
+| `MM_MAKER_ID` | Your maker id | Set on every quote and used for sequence tracking. |
+| `SOLANA_PRIVATE_KEY` | Base58 private key for signing | If unset, `production_streaming` generates a throwaway keypair (signatures from it are worthless). |
+| `DATAPI_URL` | Reference price feed | Optional; defaults to `https://datapi.jup.ag`. Used only by the example's pricing logic. |
 
 ```bash
+export MM_AUTH_TOKEN="your-api-key"
 export MM_MAKER_ID="your-maker-id"
-export MM_AUTH_TOKEN="your-jwt-token"
-export RFQ_ENDPOINT="rfq-endpoint-url"
 export SOLANA_PRIVATE_KEY="your-base58-private-key"
 ```
 
-### 2. Choose Your SDK
+:::note There is no `RFQ_ENDPOINT` variable
+The gRPC endpoint is passed to the client in code (`ClientConfig`), not read from the environment. The `production_streaming` example uses a hardcoded edge endpoint; change it in code, or adapt the example to read your own variable. See [SDK Integration](./sdk-integration.md#connecting).
+:::
 
-Jupiter provides official SDKs in Rust and Python. Both share the same shape, naming, and feature set — pick the one that fits your stack.
+## Choose your SDK
 
-#### Rust SDK
+Jupiter ships official SDKs in **Rust** and **Python** from the same repository. They share the same shape, naming, and feature set, and both generate their message types from the shared [`protos/market_maker.proto`](https://github.com/jup-ag/rfq-v2-sdk/blob/main/protos/market_maker.proto). Pick the one that fits your stack.
+
+### Rust SDK
 
 Clone and build:
 
@@ -44,19 +52,33 @@ cd rfq-v2-sdk/rust-sdk
 cargo build --release
 ```
 
-**Requirements**: Rust 1.70+ and the Tokio runtime.
+The crate is named **`market-maker-client-sdk`** (library import path `market_maker_client_sdk`). The proto is compiled at build time using a vendored `protoc`, so you do **not** need a system protobuf install.
 
-Run an example to verify the setup:
+To depend on it from your own project, add a path or git dependency (the package name differs from the repo name):
+
+```toml
+# Cargo.toml
+[dependencies]
+market-maker-client-sdk = { git = "https://github.com/jup-ag/rfq-v2-sdk", package = "market-maker-client-sdk" }
+# or, from a local clone:
+# market-maker-client-sdk = { path = "../rfq-v2-sdk/rust-sdk" }
+```
+
+:::note Signing is your responsibility
+The SDK moves opaque transaction strings — you implement the co-signing. In the **Rust** SDK, `solana-sdk` is only a dev-dependency (used by the examples), so add `solana-sdk` to your own project to sign. The **Python** SDK already ships `solders` and `base58` as runtime dependencies, so signing works out of the box.
+:::
+
+Verify the setup by running the streaming example:
 
 ```bash
 cargo run --example production_streaming
 ```
 
-Other bundled examples: `reflection_cli`, `deploy_spl_token`.
+Other bundled examples: `maker_safety`, `reflection_cli`, `deploy_spl_token` — see [SDK Integration](./sdk-integration.md) and [Last Look & Maker Safety](./last-look-and-safety.md).
 
-#### Python SDK
+### Python SDK
 
-The Python protobuf stubs are not committed to the repo — they are generated locally from `protos/market_maker.proto` after cloning. Generate them once, then install.
+The protobuf stubs are **not committed** — you generate them locally from the shared proto after cloning, then install:
 
 ```bash
 git clone https://github.com/jup-ag/rfq-v2-sdk
@@ -67,11 +89,15 @@ python scripts/generate_protos.py
 pip install .
 ```
 
-Re-run `python scripts/generate_protos.py` whenever the `.proto` file changes.
+The distribution is **`jupiter-rfq-sdk`**; the import name is **`rfq_sdk`**. Re-run `python scripts/generate_protos.py` whenever the `.proto` file changes.
 
-**Requirements**: Python 3.8+. Dependencies installed by `pip install .`: `grpcio`, `grpcio-tools`, `grpcio-reflection`, `protobuf`, `solders`, `base58`.
+:::warning Regenerate stubs before importing
+`import rfq_sdk` fails with a `ModuleNotFoundError` (and a message telling you to run the generator) if the stubs are missing. Always run `generate_protos.py` after cloning or updating the proto.
+:::
 
-Run an example to verify the setup:
+Dependencies installed by `pip install .`: `grpcio`, `grpcio-tools`, `grpcio-reflection`, `protobuf`, `solders`, `base58`. (The bare `requirements.txt` omits `grpcio-reflection`, which the reflection tooling needs — prefer `pip install .`.)
+
+Verify the setup:
 
 ```bash
 python examples/production_streaming.py
@@ -79,79 +105,22 @@ python examples/production_streaming.py
 
 Other bundled examples: `reflection_cli.py`, `deploy_spl_token.py`.
 
-## Understanding the Flow
+## What the example does
 
-### Quote Streaming
+`production_streaming` is the reference integration. On startup it:
 
-Your market maker will:
+1. Loads (or generates) a signing keypair from `SOLANA_PRIVATE_KEY`.
+2. Fetches reference prices for SOL and a demo SPL token from DatAPI.
+3. Connects to the gRPC endpoint with your API key.
+4. Opens the **swap stream** (background task) and the **quote stream** (synchronising the starting sequence number with the server).
+5. Streams multi-level SOL/USDC and demo-token/USDC orderbooks, refreshing prices periodically.
+6. On each `SWAP_AVAILABLE`, validates and co-signs the transaction, then submits it.
 
-1. **Connect** to the RFQ server via gRPC
-2. **Submit** orderbooks with bid/ask levels for token pairs
-3. **Receive** acknowledgments (quote accepted, updated, or expired)
-4. **Update** quotes in real-time based on market conditions
+Read it top to bottom — it is the most up-to-date, runnable reference for the flows described in [SDK Integration](./sdk-integration.md).
 
-### Swap Execution
+## Next steps
 
-When a user requests a swap:
-
-1. **Receive** swap notification with unsigned transaction
-2. **Validate** the swap details (price, volume, etc.)
-3. **Sign** the transaction if you accept (last look)
-4. **Submit** signed transaction back to RFQ server
-5. **Confirm** transaction execution on Solana
-
-## Price and Volume Encoding
-
-- **Volume**: Expressed in base token's smallest unit (e.g., lamports for SOL, micro-units for USDC)
-- **Price**: Quote token per unit of base token, scaled by quote-token decimals
-
-**Example**: For SOL/USDC pair:
-- SOL has 9 decimals, USDC has 6 decimals
-- Price of 100.5 USDC per SOL = `100500000` (100.5 × 10^6)
-- Volume of 10 SOL = `10000000000` (10 × 10^9)
-
-See [gRPC API Reference](./grpc-api.md) for full message schemas.
-
-## Sequence Numbers
-
-Each market maker maintains a monotonic sequence number:
-
-- Start from 1 for your first quote
-- Increment by 1 for each new quote
-- Use `GetLastSequenceNumber()` RPC to sync after reconnection
-
-This ensures quote ordering and helps the server detect gaps.
-
-## Connection Management
-
-### Health Checks
-
-Both quote and swap streams support ping/pong. The server periodically sends `PING` and the SDK automatically responds with `PONG`.
-
-### Reconnection Logic
-
-If the connection drops:
-
-1. Get the last sequence number from the server
-2. Resume from `last_sequence_number + 1`
-3. Resubmit active quotes
-
-### TLS / Authentication
-
-All connections use:
-- TLS encryption (production endpoints)
-- JWT token authentication (in `auth_token` field or gRPC metadata)
-
-## Next Steps
-
-- **[SDK Integration Guide](./sdk-integration.md)**: SDK usage and integration workflow
-- **[gRPC API Reference](./grpc-api.md)**: Complete protocol specification
-- **[Integration Testing](./testing.md)**: Required tests to pass before going live
-- **[Architecture](../v2.md)**: Understand the complete system flow
-
-## Support
-
-For integration support:
-- Technical issues: Create an issue on [GitHub](https://github.com/jup-ag/rfq-v2-sdk)
-- Credentials and onboarding: Contact the Jupiter team
-- General questions: Join the Jupiter Discord
+- **[SDK Integration](./sdk-integration.md)** — the connection, quoting, and swap loops in detail.
+- **[Last Look & Maker Safety](./last-look-and-safety.md)** — how to validate fills before signing.
+- **[gRPC API Reference](./grpc-api.md)** — message schemas, encoding, and validation rules.
+- **[Testing](./testing.md)** — verify your integration before going live.
