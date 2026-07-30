@@ -22,6 +22,9 @@ Required endpoints:
 - `POST {baseUrl}/quote` - Quote generation  
 - `POST {baseUrl}/swap` - Swap execution
 
+Optional endpoints:
+- `GET {baseUrl}/permissioned-tokens` - Tokens filled just-in-time with a mint/burn
+
 ### Authentication
 If your webhook requires authentication, provide an API key during registration. Jupiter will include it in requests as:
 ```

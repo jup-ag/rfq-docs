@@ -34,6 +34,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'api/overview',
         'api/tokens',
+        'api/permissioned-tokens',
         'api/quote',
         'api/swap',
       ],
