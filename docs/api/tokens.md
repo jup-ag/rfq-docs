@@ -64,6 +64,11 @@ Returns a JSON array of token mint addresses that your market maker supports.
 While JupiterZ supports native SOL for users, market makers should use WSOL (Wrapped SOL) in their systems. The order engine automatically handles SOL wrapping/unwrapping.
 :::
 
+:::tip Tokens you mint or burn to fill
+Tokenised RWAs such as Ondo or xStocks, where you settle by minting or burning rather than from
+inventory, belong in [`/permissioned-tokens`](./permissioned-tokens) instead.
+:::
+
 ### Token Address Validation
 All token addresses must be:
 - Valid base58-encoded Solana public keys
@@ -86,4 +91,4 @@ const COMMON_TOKENS = {
 
 ---
 
-**Next:** [Quote Endpoint](./quote) - Learn how to handle quote requests
+**Next:** [Permissioned Tokens Endpoint](./permissioned-tokens) - Advertise tokens you fill just-in-time
