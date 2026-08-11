@@ -85,6 +85,12 @@ const config: Config = {
         },
         {
           type: 'docSidebar',
+          sidebarId: 'integratorsSidebar',
+          position: 'left',
+          label: 'Integrators',
+        },
+        {
+          type: 'docSidebar',
           sidebarId: 'statsSidebar',
           position: 'left',
           label: 'JupiterZ API',
@@ -126,15 +132,28 @@ const config: Config = {
           ],
         },
         {
+          title: 'Integrators',
+          items: [
+            {
+              label: 'Overview',
+              to: '/docs/integrators/overview',
+            },
+            {
+              label: 'Order Endpoints',
+              to: '/docs/integrators/order',
+            },
+            {
+              label: 'Execute Endpoint',
+              to: '/docs/integrators/execute',
+            },
+          ],
+        },
+        {
           title: 'JupiterZ API',
           items: [
             {
               label: 'Overview',
               to: '/docs/stats/overview',
-            },
-            {
-              label: 'API Reference',
-              to: '/docs/stats/api-reference',
             },
           ],
         },

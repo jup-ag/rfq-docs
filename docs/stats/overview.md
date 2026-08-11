@@ -1,29 +1,15 @@
 ---
-title: JupiterZ API Overview
+title: JupiterZ API
 sidebar_position: 5
 ---
 
-# JupiterZ API
+# 🚧 Under Construction
 
-The JupiterZ API provides analytics and performance metrics for the JupiterZ system.
+The JupiterZ API documentation is being rewritten and is temporarily unavailable.
 
-## Base URL
+In the meantime:
 
-**https://stats.jup.ag**
+- **Integrating JupiterZ into your app?** See the [Integrator docs](../integrators/overview).
+- **Running a market maker?** See the [Market Maker docs](../intro).
 
-## What Can You Track?
-
-- **Volume Metrics**: Track trading volume in USD  
-- **Fee Analytics**: Monitor fee generation and rates
-- **Transaction Data**: Access transaction information by ID, slot, or request ID
-- **Market Maker Performance**: View top-performing market makers
-- **Token Pair Analytics**: Identify most active trading pairs
-
-## Rate Limits
-
-- **Limit:** 1 request per second per IP
-- **Response:** 429 Too Many Requests when exceeded
-
-## Support
-
-For questions: [Telegram](https://t.me/biuu0x)
+For anything else, reach out on [Telegram](https://t.me/dexterdev8).
