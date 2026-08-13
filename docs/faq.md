@@ -25,7 +25,7 @@ JupiterZ (Request for Quote) is a system that allows market makers to provide li
 
 1. **Build your webhook**: Implement the three required endpoints (`/tokens`, `/quote`, `/swap`)
 2. **Test thoroughly**: Use our acceptance and integration test suites
-3. **Contact Jupiter**: Reach out to [Jo on Telegram](https://t.me/biuu0x) to register
+3. **Contact Jupiter**: Reach out to [dexterdev8 on Telegram](https://t.me/dexterdev8) to register
 4. **Go live**: After verification, your webhook will be added to production
 
 ## Technical Implementation

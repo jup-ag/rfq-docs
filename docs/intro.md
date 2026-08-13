@@ -13,7 +13,7 @@ Welcome to the **JupiterZ Webhook Toolkit** documentation! This comprehensive gu
 JupiterZ allows market makers to provide liquidity and adjust their quotes without being subject to the volatility of on-chain gas prices or chain health. RFQ fills are much less computationally intensive (10x less) compared to AMM swaps and can save gas costs in the long run.
 
 :::info
-📣 **NOTE**: This integration is still subject to changes, and we welcome suggestions for improvements. If you're interested in becoming a Market Maker on JupiterZ, please read this documentation and reach out to [Jo](https://t.me/biuu0x) on Telegram to register your webhook.
+📣 **NOTE**: This integration is still subject to changes, and we welcome suggestions for improvements. If you're interested in becoming a Market Maker on JupiterZ, please read this documentation and reach out to [dexterdev8](https://t.me/dexterdev8) on Telegram to register your webhook.
 :::
 
 ## Key Features
@@ -28,6 +28,7 @@ JupiterZ allows market makers to provide liquidity and adjust their quotes witho
 Choose your path based on your role:
 
 - **Market Makers**: Start with the [Integration Guide](./integration/overview) to understand the webhook requirements
+- **Integrators**: Consuming JupiterZ quotes in your app? See the [Integrator docs](./integrators/overview)
 - **Developers**: Check out the [API Documentation](./api/overview) for technical details
 - **Testing**: Use our [Testing Suite](./testing/overview) to validate your implementation
 
@@ -51,4 +52,4 @@ The RFQ system works through a webhook-based architecture where:
 
 - Check the [FAQ](./faq) for common questions
 - Review the [Troubleshooting](./testing/troubleshooting) guide for common issues
-- Reach out on [Telegram](https://t.me/biuu0x) for direct support
+- Reach out on [Telegram](https://t.me/dexterdev8) for direct support

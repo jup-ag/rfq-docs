@@ -48,7 +48,7 @@ This command generates static content into the `build` directory and can be serv
 
 This documentation is based on the official JupiterZ Webhook Toolkit:
 - **GitHub Repository**: [jup-ag/rfq-webhook-toolkit](https://github.com/jup-ag/rfq-webhook-toolkit)
-- **Contact**: [Jo on Telegram](https://t.me/biuu0x) for integration support
+- **Contact**: [dexterdev8 on Telegram](https://t.me/dexterdev8) for integration support
 
 ## Technology Stack
 

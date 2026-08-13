@@ -68,10 +68,16 @@ const sidebars: SidebarsConfig = {
     },
   ],
   
+  // Integrators - consuming JupiterZ quotes via the Jupiter Develop Platform
+  integratorsSidebar: [
+    'integrators/overview',
+    'integrators/order',
+    'integrators/execute',
+  ],
+
   // Sidebar for JupiterZ API documentation
   statsSidebar: [
     'stats/overview',
-    'stats/api-reference',
   ],
 };
 
