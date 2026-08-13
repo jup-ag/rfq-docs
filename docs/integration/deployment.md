@@ -24,7 +24,7 @@ This guide covers best practices for deploying your JupiterZ webhook to producti
 
 Once your webhook is deployed and tested:
 
-1. **Contact Jupiter Team**: Reach out to [dexterdev8](https://t.me/dexterdev8) on Telegram
+1. **Contact Jupiter Team**: Reach out to [Integrators Support](https://support.jup.ag/requests/new/amm-integrators)
 2. **Provide Details**:
    - Webhook base URL
    - API key (if required)
