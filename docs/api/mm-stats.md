@@ -17,10 +17,15 @@ and how the swap ended.
 
 ## Access
 
+:::info Sign in to the Jupiter Develop Platform
+To call these endpoints you need an API key. Sign in on the
+**[Jupiter Develop Platform](https://developers.jup.ag/)** to create one, and send it in the
+`x-api-key` header on every request. Requests without it return `401 Unauthorized`.
+:::
+
 - **Base URL:** `https://<rfq-api-host>/v1`
-- **Authentication:** none. Your MM secret, part of the path, identifies you.
-- **MM secret:** a UUID Jupiter assigns to your webhook. Ask your Jupiter contact for it. A newly
-  assigned secret works within 30 seconds.
+- **MM secret:** a UUID Jupiter assigns to your webhook. It goes in the path and identifies your
+  webhook. Ask your Jupiter contact for it. A newly assigned secret works within 30 seconds.
 - Lookups work whatever your webhook's status, including while it is suspended.
 
 :::warning Keep your secret private
@@ -37,7 +42,8 @@ Your swap outcomes over a rolling 30-day window, counted by when each swap resol
 ### Request
 
 ```bash
-curl 'https://<rfq-api-host>/v1/mm-stats/<your-mm-secret>/fill-rate'
+curl 'https://<rfq-api-host>/v1/mm-stats/<your-mm-secret>/fill-rate' \
+  -H 'x-api-key: your-api-key'
 ```
 
 ### Response
@@ -69,7 +75,8 @@ Tells you whether the taker executed your quote for a request, and how that swap
 ### Request
 
 ```bash
-curl 'https://<rfq-api-host>/v1/mm-stats/<your-mm-secret>/winning-quote/629bddf3-0038-43a6-8956-f5433d6b1191'
+curl 'https://<rfq-api-host>/v1/mm-stats/<your-mm-secret>/winning-quote/629bddf3-0038-43a6-8956-f5433d6b1191' \
+  -H 'x-api-key: your-api-key'
 ```
 
 ### Response
@@ -125,11 +132,12 @@ Content-Type: application/json
 
 ```ts
 const BASE = 'https://<rfq-api-host>/v1/mm-stats';
+const headers = { 'x-api-key': process.env.JUP_API_KEY! };
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 async function waitForWinningQuote(mmSecret: string, requestId: string) {
   for (let attempt = 0; attempt < 30; attempt++) {
-    const res = await fetch(`${BASE}/${mmSecret}/winning-quote/${requestId}`);
+    const res = await fetch(`${BASE}/${mmSecret}/winning-quote/${requestId}`, { headers });
     if (res.status === 425) {
       await sleep(Number(res.headers.get('retry-after') ?? 2) * 1000);
       continue;
@@ -157,6 +165,7 @@ Errors use one JSON body. `errorCode` is `null` unless listed below.
 | Status | `errorCode` | Cause |
 |--------|-------------|-------|
 | `400` | — | `mm_secret_uuid` or `request_uuid` is not a valid UUID |
+| `401` | — | Missing or invalid `x-api-key` |
 | `404` | — | No webhook has this MM secret |
 | `425` | `TOO_EARLY` | Winning quote only: no swap for this request yet, or it is under 10 seconds old |
 | `500` | — | Server-side failure |
