@@ -37,6 +37,7 @@ const sidebars: SidebarsConfig = {
         'api/permissioned-tokens',
         'api/quote',
         'api/swap',
+        'api/mm-stats',
       ],
     },
     {
